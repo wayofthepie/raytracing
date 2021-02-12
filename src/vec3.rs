@@ -11,6 +11,14 @@ impl Vec3 {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
+
+    pub fn length(&self) -> f32 {
+        self.length_squared().sqrt()
+    }
+
+    pub fn length_squared(&self) -> f32 {
+        (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
+    }
 }
 
 impl ops::Neg for Vec3 {
@@ -118,6 +126,38 @@ mod test {
                 y: y / 2.0,
                 z: z / 2.0
             }
+        );
+    }
+
+    #[test]
+    fn length_squared_should_compute_correct_value() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let vec = Vec3 { x, y, z };
+        let length_squared = vec.length_squared();
+        let expected: f32 = (x * x) + (y * y) + (z * z);
+        assert!(
+            (expected - length_squared).abs() < f32::EPSILON,
+            "got {} expected {}",
+            length_squared,
+            expected
+        );
+    }
+
+    #[test]
+    fn length_should_compute_correct_value() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let vec = Vec3 { x, y, z };
+        let length = vec.length();
+        let expected: f32 = ((x * x) + (y * y) + (z * z)).sqrt();
+        assert!(
+            (expected - length).abs() < f32::EPSILON,
+            "got {} expected {}",
+            length,
+            expected
         );
     }
 }
