@@ -25,6 +25,18 @@ pub fn dot(u: &Vec3, v: &Vec3) -> f32 {
     u.x * v.x + u.y * v.y + u.z * v.z
 }
 
+pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
+    Vec3 {
+        x: (u.y * v.z) - (v.z * u.y),
+        y: (u.z * v.x) - (u.x * v.z),
+        z: (u.x * v.y) - (u.y * v.x),
+    }
+}
+
+pub fn unit_vector(v: &Vec3) -> Vec3 {
+    v / v.length()
+}
+
 impl ops::Neg for Vec3 {
     type Output = Self;
 
@@ -74,11 +86,19 @@ impl ops::Mul for Vec3 {
     }
 }
 
-impl ops::Mul<f32> for Vec3 {
-    type Output = Self;
+impl<'a> ops::Div<f32> for &'a Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: f32) -> Self::Output {
+        self * (1.0 / rhs)
+    }
+}
+
+impl<'a> ops::Mul<f32> for &'a Vec3 {
+    type Output = Vec3;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        Self {
+        Vec3 {
             x: (self.x * rhs),
             y: (self.y * rhs),
             z: (self.z * rhs),
@@ -112,7 +132,7 @@ impl ops::DivAssign<f32> for Vec3 {
 
 #[cfg(test)]
 mod test {
-    use super::{dot, Vec3};
+    use super::{cross, dot, unit_vector, Vec3};
 
     #[test]
     fn negation_should_negate_all_fields() {
@@ -232,13 +252,30 @@ mod test {
         let y = 2.0;
         let z = 3.0;
         let vec = Vec3 { x, y, z };
-        let answer = vec * 2.0;
+        let answer = &vec * 2.0;
         assert_eq!(
             answer,
             Vec3 {
                 x: 2.0,
                 y: 4.0,
                 z: 6.0
+            }
+        );
+    }
+
+    #[test]
+    fn div_with_f32_should_perform_correctly() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let vec = Vec3 { x, y, z };
+        let answer = &vec / 2.0;
+        assert_eq!(
+            answer,
+            Vec3 {
+                x: x / 2.0,
+                y: y / 2.0,
+                z: z / 2.0
             }
         );
     }
@@ -307,5 +344,32 @@ mod test {
             answer,
             expected
         );
+    }
+
+    #[test]
+    fn cross_product_should_be_correct() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let one = Vec3 { x, y, z };
+        let two = Vec3 { x, y, z };
+        let answer = cross(&one, &two);
+        let expected = Vec3 {
+            x: (y * z) - (z * y),
+            y: (z * x) - (x * z),
+            z: (x * y) - (y * x),
+        };
+        assert_eq!(answer, expected)
+    }
+
+    #[test]
+    fn unit_vector_should_be_correct() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let one = Vec3 { x, y, z };
+        let answer = unit_vector(&one);
+        let expected = &one * (1.0 / one.length());
+        assert_eq!(answer, expected);
     }
 }
