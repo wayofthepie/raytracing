@@ -70,6 +70,18 @@ impl ops::Mul for Vec3 {
     }
 }
 
+impl ops::Mul<f32> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self {
+            x: (self.x * rhs),
+            y: (self.y * rhs),
+            z: (self.z * rhs),
+        }
+    }
+}
+
 impl ops::AddAssign<f32> for Vec3 {
     fn add_assign(&mut self, rhs: f32) {
         self.x = self.x + rhs;
@@ -206,6 +218,23 @@ mod test {
                 x: 2.0,
                 y: 6.0,
                 z: 12.0
+            }
+        );
+    }
+
+    #[test]
+    fn mul_with_f32_should_perform_correctly() {
+        let x = 1.0;
+        let y = 2.0;
+        let z = 3.0;
+        let vec = Vec3 { x, y, z };
+        let answer = vec * 2.0;
+        assert_eq!(
+            answer,
+            Vec3 {
+                x: 2.0,
+                y: 4.0,
+                z: 6.0
             }
         );
     }
