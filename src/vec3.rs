@@ -46,6 +46,18 @@ impl ops::Add for Vec3 {
     }
 }
 
+impl ops::Sub for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: (self.x - rhs.x),
+            y: (self.y - rhs.y),
+            z: (self.z - rhs.z),
+        }
+    }
+}
+
 impl ops::AddAssign<f32> for Vec3 {
     fn add_assign(&mut self, rhs: f32) {
         self.x = self.x + rhs;
@@ -138,6 +150,28 @@ mod test {
                 x: x + 1.0,
                 y: y + 1.0,
                 z: z + 1.0
+            }
+        );
+    }
+
+    #[test]
+    fn sub_assign_should_perform_correctly() {
+        let x = 1.0;
+        let y = 2.0;
+        let z = 3.0;
+        let one = Vec3 { x, y, z };
+        let two = Vec3 {
+            x: x + 1.0,
+            y: y + 1.0,
+            z: z + 1.0,
+        };
+        let vec = two - one;
+        assert_eq!(
+            vec,
+            Vec3 {
+                x: 1.0,
+                y: 1.0,
+                z: 1.0
             }
         );
     }
