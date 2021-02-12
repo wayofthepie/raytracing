@@ -34,6 +34,18 @@ impl ops::Neg for Vec3 {
     }
 }
 
+impl ops::Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: (self.x + rhs.x),
+            y: (self.y + rhs.y),
+            z: (self.z + rhs.z),
+        }
+    }
+}
+
 impl ops::AddAssign<f32> for Vec3 {
     fn add_assign(&mut self, rhs: f32) {
         self.x = self.x + rhs;
@@ -91,6 +103,24 @@ mod test {
                 x: 2.0,
                 y: 4.0,
                 z: 6.0
+            }
+        );
+    }
+
+    #[test]
+    fn add_should_perform_correctly() {
+        let x = 1.0;
+        let y = 2.0;
+        let z = 3.0;
+        let one = Vec3 { x, y, z };
+        let two = Vec3 { x, y, z };
+        let answer = one + two;
+        assert_eq!(
+            answer,
+            Vec3 {
+                x: x + x,
+                y: y + y,
+                z: z + z
             }
         );
     }
