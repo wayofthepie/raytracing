@@ -1,7 +1,7 @@
 use std::ops;
 
 #[derive(Debug, PartialEq)]
-struct Vec3 {
+pub struct Vec3 {
     x: f32,
     y: f32,
     z: f32,
@@ -19,6 +19,10 @@ impl Vec3 {
     pub fn length_squared(&self) -> f32 {
         (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
     }
+}
+
+pub fn dot(u: &Vec3, v: &Vec3) -> f32 {
+    u.x * v.x + u.y * v.y + u.z * v.z
 }
 
 impl ops::Neg for Vec3 {
@@ -108,7 +112,7 @@ impl ops::DivAssign<f32> for Vec3 {
 
 #[cfg(test)]
 mod test {
-    use super::Vec3;
+    use super::{dot, Vec3};
 
     #[test]
     fn negation_should_negate_all_fields() {
@@ -284,6 +288,23 @@ mod test {
             (expected - length).abs() < f32::EPSILON,
             "got {} expected {}",
             length,
+            expected
+        );
+    }
+
+    #[test]
+    fn dot_product_should_be_correct() {
+        let x = 2.0;
+        let y = 3.0;
+        let z = 5.0;
+        let one = Vec3 { x, y, z };
+        let two = Vec3 { x, y, z };
+        let answer = dot(&one, &two);
+        let expected: f32 = (x * x) + (y * y) + (z * z);
+        assert!(
+            (expected - answer).abs() < f32::EPSILON,
+            "got {} expected {}",
+            answer,
             expected
         );
     }
