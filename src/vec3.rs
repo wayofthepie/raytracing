@@ -22,7 +22,7 @@ impl Vec3 {
 }
 
 impl ops::Neg for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
 
     fn neg(self) -> Self::Output {
         let Self { x, y, z } = self;
@@ -35,7 +35,7 @@ impl ops::Neg for Vec3 {
 }
 
 impl ops::Add for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
         Self {
@@ -47,7 +47,7 @@ impl ops::Add for Vec3 {
 }
 
 impl ops::Sub for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Self {
@@ -59,7 +59,7 @@ impl ops::Sub for Vec3 {
 }
 
 impl ops::Mul for Vec3 {
-    type Output = Vec3;
+    type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
         Self {
