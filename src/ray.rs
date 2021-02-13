@@ -1,6 +1,6 @@
 use crate::{
-    hit::{Hit, HitRecord, Hittables},
-    vec3::{random_in_hemisphere, unit_vector, Vec3},
+    hit::{Hit, Hittables},
+    vec3::{unit_vector, Vec3},
 };
 use rand::{distributions::Uniform, prelude::ThreadRng};
 

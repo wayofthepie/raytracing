@@ -25,15 +25,12 @@ const MAX_DEPTH: u16 = 50;
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
 
-    let mut rng = rand::thread_rng();
-    let between = Uniform::new(0.0, 1.0);
-    let mut l = Lambertian::new(Vec3::new(0.8, 0.8, 0.0), &mut rng, &between);
+    // TODO this is total madness :D refactor!
+    let mut l = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
     let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
     let material_ground = Some(Rc::new(l));
 
-    let mut rng_two = rand::thread_rng();
-    let between_two = Uniform::new(0.0, 1.0);
-    let mut l = Lambertian::new(Vec3::new(0.7, 0.3, 0.3), &mut rng_two, &between_two);
+    let mut l = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
     let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
     let material_center = Some(Rc::new(l));
 

@@ -1,7 +1,4 @@
-use rand::{
-    distributions::Uniform,
-    prelude::{Distribution, ThreadRng},
-};
+use rand::Rng;
 use std::ops;
 
 #[derive(Default, Debug, PartialEq, Clone, Copy)]
@@ -16,11 +13,11 @@ impl Vec3 {
         Self { x, y, z }
     }
 
-    pub fn random(rng: &mut ThreadRng, between: &Uniform<f64>, min: f64, max: f64) -> Self {
+    pub fn random(min: f64, max: f64) -> Self {
         Vec3::new(
-            random_bounded(rng, between, min, max),
-            random_bounded(rng, between, min, max),
-            random_bounded(rng, between, min, max),
+            random_bounded(min, max),
+            random_bounded(min, max),
+            random_bounded(min, max),
         )
     }
 
@@ -42,13 +39,14 @@ pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
     v - 2.0 * dot(v, n) * n
 }
 
-pub fn random_bounded(rng: &mut ThreadRng, between: &Uniform<f64>, min: f64, max: f64) -> f64 {
-    min + (max - min) * between.sample(rng)
+pub fn random_bounded(min: f64, max: f64) -> f64 {
+    let mut rng = rand::thread_rng();
+    min + (max - min) * rng.gen_range(min..max)
 }
 
-pub fn random_in_unit_sphere(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
+pub fn random_in_unit_sphere() -> Vec3 {
     loop {
-        let p = Vec3::random(rng, between, -1.0, 1.0);
+        let p = Vec3::random(-1.0, 1.0);
         if p.length_squared() >= 1.0 {
             continue;
         }
@@ -56,29 +54,12 @@ pub fn random_in_unit_sphere(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec
     }
 }
 
-pub fn random_in_hemisphere(normal: Vec3, rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
-    let in_unit_sphere = random_in_unit_sphere(rng, between);
-    if dot(in_unit_sphere, normal) > 0.0 {
-        in_unit_sphere
-    } else {
-        -in_unit_sphere
-    }
-}
-
-pub fn random_unit_vector(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
-    unit_vector(random_in_unit_sphere(rng, between))
+pub fn random_unit_vector() -> Vec3 {
+    unit_vector(random_in_unit_sphere())
 }
 
 pub fn dot(u: Vec3, v: Vec3) -> f64 {
     u.x * v.x + u.y * v.y + u.z * v.z
-}
-
-pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
-    Vec3 {
-        x: (u.y * v.z) - (v.z * u.y),
-        y: (u.z * v.x) - (u.x * v.z),
-        z: (u.x * v.y) - (u.y * v.x),
-    }
 }
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
@@ -128,7 +109,7 @@ impl_op_ex!(/=|l: &mut Vec3, r: f64| {
 
 #[cfg(test)]
 mod test {
-    use super::{cross, dot, unit_vector, Vec3};
+    use super::{dot, unit_vector, Vec3};
 
     #[test]
     fn negation_should_negate_all_fields() {
@@ -340,22 +321,6 @@ mod test {
             answer,
             expected
         );
-    }
-
-    #[test]
-    fn cross_product_should_be_correct() {
-        let x = 2.0;
-        let y = 3.0;
-        let z = 5.0;
-        let one = Vec3 { x, y, z };
-        let two = Vec3 { x, y, z };
-        let answer = cross(one, two);
-        let expected = Vec3 {
-            x: (y * z) - (z * y),
-            y: (z * x) - (x * z),
-            z: (x * y) - (y * x),
-        };
-        assert_eq!(answer, expected)
     }
 
     #[test]

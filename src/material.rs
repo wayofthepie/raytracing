@@ -2,7 +2,6 @@ use crate::{
     ray::Ray,
     vec3::{dot, random_unit_vector, reflect, unit_vector, Vec3},
 };
-use rand::{distributions::Uniform, prelude::ThreadRng};
 
 pub trait Material {
     fn scatter(
@@ -15,23 +14,17 @@ pub trait Material {
     ) -> bool;
 }
 
-pub struct Lambertian<'rng> {
+pub struct Lambertian {
     albedo: Vec3,
-    rng: &'rng mut ThreadRng,
-    between: &'rng Uniform<f64>,
 }
 
-impl<'rng> Lambertian<'rng> {
-    pub fn new(albedo: Vec3, rng: &'rng mut ThreadRng, between: &'rng Uniform<f64>) -> Self {
-        Self {
-            albedo,
-            rng,
-            between,
-        }
+impl Lambertian {
+    pub fn new(albedo: Vec3) -> Self {
+        Self { albedo }
     }
 }
 
-impl<'rng> Material for Lambertian<'rng> {
+impl Material for Lambertian {
     fn scatter(
         &mut self,
         _: &Ray,
@@ -40,7 +33,7 @@ impl<'rng> Material for Lambertian<'rng> {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool {
-        let mut scatter_direction = normal + random_unit_vector(self.rng, self.between);
+        let mut scatter_direction = normal + random_unit_vector();
         if scatter_direction.near_zero() {
             scatter_direction = normal;
         }
