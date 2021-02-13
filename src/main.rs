@@ -1,4 +1,5 @@
 mod ray;
+mod sphere;
 mod vec3;
 use ray::{ray_color, Ray};
 use std::{error::Error, io::Write};
