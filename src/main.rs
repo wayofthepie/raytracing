@@ -2,14 +2,18 @@
 extern crate impl_ops;
 
 mod camera;
+mod hit;
+mod material;
 mod ray;
 mod sphere;
 mod vec3;
 use camera::Camera;
+use hit::Hittables;
+use material::{Lambertian, Material, Metal};
 use rand::{distributions::Uniform, prelude::Distribution};
 use ray::ray_color;
-use sphere::{Hittables, Sphere};
-use std::{error::Error, io::Write};
+use sphere::Sphere;
+use std::{cell::RefCell, error::Error, io::Write, rc::Rc};
 use vec3::Vec3;
 
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -20,14 +24,42 @@ const MAX_DEPTH: u16 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
-    // World
-    let mut world = Hittables::new();
-    world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5));
-    world.add(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0));
 
-    let camera = Camera::new();
     let mut rng = rand::thread_rng();
     let between = Uniform::new(0.0, 1.0);
+    let mut l = Lambertian::new(Vec3::new(0.8, 0.8, 0.0), &mut rng, &between);
+    let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
+    let material_ground = Some(Rc::new(l));
+
+    let mut rng_two = rand::thread_rng();
+    let between_two = Uniform::new(0.0, 1.0);
+    let mut l = Lambertian::new(Vec3::new(0.7, 0.3, 0.3), &mut rng_two, &between_two);
+    let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
+    let material_center = Some(Rc::new(l));
+
+    let mut metal = Metal::new(Vec3::new(0.8, 0.8, 0.8));
+    let metal: RefCell<&mut dyn Material> = RefCell::new(&mut metal);
+    let material_left = Some(Rc::new(metal));
+
+    let mut metal = Metal::new(Vec3::new(0.8, 0.6, 0.3));
+    let metal: RefCell<&mut dyn Material> = RefCell::new(&mut metal);
+    let material_right = Some(Rc::new(metal));
+
+    let mut rng = rand::thread_rng();
+    let between = Uniform::new(0.0, 1.0);
+
+    // World
+    let mut world = Hittables::new();
+    world.add(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    ));
+    world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
+    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
+
+    let camera = Camera::new();
 
     stdout.write_all(format!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT).as_bytes())?;
     for j in (0..IMAGE_HEIGHT).rev() {
