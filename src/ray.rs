@@ -1,4 +1,9 @@
-use crate::vec3::{dot, unit_vector, Vec3};
+use std::f32::INFINITY;
+
+use crate::{
+    sphere::{Hit, HitRecord, Hittables},
+    vec3::{dot, unit_vector, Vec3},
+};
 
 pub struct Ray {
     pub origin: Vec3,
@@ -15,11 +20,13 @@ impl Ray {
     }
 }
 
-pub fn ray_color(ray: &Ray) -> Vec3 {
-    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, ray);
-    if t > 0.0 {
-        let n = unit_vector(ray.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return Vec3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
+pub fn ray_color<T>(ray: &Ray, world: &Hittables<T>) -> Vec3
+where
+    T: Hit,
+{
+    let mut record = HitRecord::default();
+    if world.hit(ray, 0.0, f32::INFINITY, &mut record) {
+        return (record.normal + Vec3::new(1.0, 1.0, 1.0)) * 0.5;
     }
     let unit_direction = unit_vector(ray.direction);
     let t = 0.5 * (unit_direction.y + 1.0);
