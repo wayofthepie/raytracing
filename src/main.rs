@@ -5,7 +5,7 @@ use std::{error::Error, io::Write};
 use vec3::Vec3;
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 400;
+const IMAGE_WIDTH: usize = 1200;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;
 
 const VIEWPORT_HEIGHT: f32 = 2.0;
