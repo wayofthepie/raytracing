@@ -6,15 +6,15 @@ mod ray;
 mod sphere;
 mod vec3;
 use camera::Camera;
-use rand::Rng;
+use rand::{distributions::Uniform, prelude::Distribution};
 use ray::ray_color;
 use sphere::{Hittables, Sphere};
 use std::{error::Error, io::Write};
 use vec3::Vec3;
 
-const ASPECT_RATIO: f32 = 16.0 / 9.0;
+const ASPECT_RATIO: f64 = 16.0 / 9.0;
 const IMAGE_WIDTH: usize = 400;
-const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;
+const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 const SAMPLES_PER_PIXEL: usize = 100;
 const MAX_DEPTH: u16 = 50;
 
@@ -27,6 +27,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let camera = Camera::new();
     let mut rng = rand::thread_rng();
+    let between = Uniform::new(0.0, 1.0);
 
     stdout.write_all(format!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT).as_bytes())?;
     for j in (0..IMAGE_HEIGHT).rev() {
@@ -34,10 +35,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         for i in 0..IMAGE_WIDTH {
             let mut color = Vec3::new(0.0, 0.0, 0.0);
             for _ in 0..SAMPLES_PER_PIXEL {
-                let u = (i as f32 + rng.gen_range(0.0..1.0)) / (IMAGE_WIDTH - 1) as f32;
-                let v = (j as f32 + rng.gen_range(0.0..1.0)) / (IMAGE_HEIGHT - 1) as f32;
+                let u = (i as f64 + between.sample(&mut rng)) / (IMAGE_WIDTH - 1) as f64;
+                let v = (j as f64 + between.sample(&mut rng)) / (IMAGE_HEIGHT - 1) as f64;
                 let ray = camera.get_ray(u, v);
-                color += ray_color(&ray, &world, MAX_DEPTH, &mut rng);
+                color += ray_color(&ray, &world, MAX_DEPTH, &mut rng, &between);
             }
             write_color(&stdout, color, SAMPLES_PER_PIXEL)?;
         }
@@ -54,7 +55,7 @@ fn write_color(
     let mut r = color.x;
     let mut g = color.y;
     let mut b = color.z;
-    let scale = 1.0 / samples_per_pixel as f32;
+    let scale = 1.0 / samples_per_pixel as f64;
     r = (scale * r).sqrt();
     g = (scale * g).sqrt();
     b = (scale * b).sqrt();

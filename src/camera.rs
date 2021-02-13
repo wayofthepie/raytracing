@@ -1,9 +1,9 @@
 use crate::{ray::Ray, vec3::Vec3};
 
-const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const VIEWPORT_HEIGHT: f32 = 2.0;
-const VIEWPORT_WIDTH: f32 = ASPECT_RATIO * VIEWPORT_HEIGHT;
-const FOCAL_LENGTH: f32 = 1.0;
+const ASPECT_RATIO: f64 = 16.0 / 9.0;
+const VIEWPORT_HEIGHT: f64 = 2.0;
+const VIEWPORT_WIDTH: f64 = ASPECT_RATIO * VIEWPORT_HEIGHT;
+const FOCAL_LENGTH: f64 = 1.0;
 
 pub struct Camera {
     origin: Vec3,
@@ -28,7 +28,7 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
         let direction =
             self.lower_left_corner + u * self.horizontal + v * self.vertical - self.origin;
         Ray::new(self.origin, direction)

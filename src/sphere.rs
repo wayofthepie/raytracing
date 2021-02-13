@@ -9,7 +9,7 @@ use crate::{
 pub struct HitRecord {
     pub point: Vec3,
     pub normal: Vec3,
-    pub t: f32,
+    pub t: f64,
     pub front_face: bool,
 }
 
@@ -25,22 +25,22 @@ impl HitRecord {
 }
 
 pub trait Hit {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, record: &mut HitRecord) -> bool;
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, record: &mut HitRecord) -> bool;
 }
 
 pub struct Sphere {
     center: Vec3,
-    radius: f32,
+    radius: f64,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f32) -> Self {
+    pub fn new(center: Vec3, radius: f64) -> Self {
         Self { center, radius }
     }
 }
 
 impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, record: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, record: &mut HitRecord) -> bool {
         let oc = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let half_b = dot(oc, ray.direction);
@@ -86,7 +86,7 @@ where
         self.0.push_back(hittable)
     }
 
-    pub fn hit(&self, ray: &Ray, t_min: f32, t_max: f32, record: &mut HitRecord) -> bool {
+    pub fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, record: &mut HitRecord) -> bool {
         let mut tmp_record = HitRecord::default();
         let mut hit_anything = false;
         let mut closest_to = t_max;

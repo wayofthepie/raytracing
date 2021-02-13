@@ -1,43 +1,46 @@
+use rand::{
+    distributions::Uniform,
+    prelude::{Distribution, ThreadRng},
+    Rng,
+};
 use std::ops;
-
-use rand::{prelude::ThreadRng, Rng};
 
 #[derive(Default, Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 impl Vec3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
-    pub fn length(&self) -> f32 {
+    pub fn random(rng: &mut ThreadRng, between: &Uniform<f64>, min: f64, max: f64) -> Self {
+        Vec3::new(
+            random_bounded(rng, between, min, max),
+            random_bounded(rng, between, min, max),
+            random_bounded(rng, between, min, max),
+        )
+    }
+
+    pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
-    pub fn length_squared(&self) -> f32 {
+    pub fn length_squared(&self) -> f64 {
         (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
     }
 }
 
-pub fn random(rng: &mut ThreadRng) -> Vec3 {
-    random_bounded(rng, 0.0, 1.0)
+pub fn random_bounded(rng: &mut ThreadRng, between: &Uniform<f64>, min: f64, max: f64) -> f64 {
+    min + (max - min) * between.sample(rng)
 }
 
-pub fn random_bounded(rng: &mut ThreadRng, min: f32, max: f32) -> Vec3 {
-    Vec3::new(
-        rng.gen_range(min..max),
-        rng.gen_range(min..max),
-        rng.gen_range(min..max),
-    )
-}
-
-pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
+pub fn random_in_unit_sphere(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
     loop {
-        let p = random_bounded(rng, -1.0, 1.0);
+        let p = Vec3::random(rng, between, -1.0, 1.0);
         if p.length_squared() >= 1.0 {
             continue;
         }
@@ -45,7 +48,7 @@ pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
     }
 }
 
-pub fn dot(u: Vec3, v: Vec3) -> f32 {
+pub fn dot(u: Vec3, v: Vec3) -> f64 {
     u.x * v.x + u.y * v.y + u.z * v.z
 }
 
@@ -84,19 +87,19 @@ impl_op_ex!(*=|l: &mut Vec3, r: &Vec3| {
         l.y = l.y * r.y;
         l.z = l.z * r.z;
 });
-impl_op_ex_commutative!(*|l: &Vec3, r: f32| -> Vec3 { Vec3::new(l.x * r, l.y * r, l.z * r) });
-impl_op_ex_commutative!(/|l: &Vec3, r: f32| -> Vec3 { Vec3::new(l.x / r, l.y / r, l.z / r) });
-impl_op_ex!(+=|l: &mut Vec3, r: f32| {
+impl_op_ex_commutative!(*|l: &Vec3, r: f64| -> Vec3 { Vec3::new(l.x * r, l.y * r, l.z * r) });
+impl_op_ex_commutative!(/|l: &Vec3, r: f64| -> Vec3 { Vec3::new(l.x / r, l.y / r, l.z / r) });
+impl_op_ex!(+=|l: &mut Vec3, r: f64| {
         l.x = l.x + r;
         l.y = l.y + r;
         l.z = l.z + r;
 });
-impl_op_ex!(*=|l: &mut Vec3, r: f32| {
+impl_op_ex!(*=|l: &mut Vec3, r: f64| {
         l.x = l.x * r;
         l.y = l.y * r;
         l.z = l.z * r;
 });
-impl_op_ex!(/=|l: &mut Vec3, r: f32| {
+impl_op_ex!(/=|l: &mut Vec3, r: f64| {
         l.x = l.x / r;
         l.y = l.y / r;
         l.z = l.z / r;
@@ -219,7 +222,7 @@ mod test {
     }
 
     #[test]
-    fn mul_with_f32_should_perform_correctly() {
+    fn mul_with_f64_should_perform_correctly() {
         let x = 1.0;
         let y = 2.0;
         let z = 3.0;
@@ -236,7 +239,7 @@ mod test {
     }
 
     #[test]
-    fn div_with_f32_should_perform_correctly() {
+    fn div_with_f64_should_perform_correctly() {
         let x = 2.0;
         let y = 3.0;
         let z = 5.0;
@@ -276,9 +279,9 @@ mod test {
         let z = 5.0;
         let vec = Vec3 { x, y, z };
         let length_squared = vec.length_squared();
-        let expected: f32 = (x * x) + (y * y) + (z * z);
+        let expected: f64 = (x * x) + (y * y) + (z * z);
         assert!(
-            (expected - length_squared).abs() < f32::EPSILON,
+            (expected - length_squared).abs() < f64::EPSILON,
             "got {} expected {}",
             length_squared,
             expected
@@ -292,9 +295,9 @@ mod test {
         let z = 5.0;
         let vec = Vec3 { x, y, z };
         let length = vec.length();
-        let expected: f32 = ((x * x) + (y * y) + (z * z)).sqrt();
+        let expected: f64 = ((x * x) + (y * y) + (z * z)).sqrt();
         assert!(
-            (expected - length).abs() < f32::EPSILON,
+            (expected - length).abs() < f64::EPSILON,
             "got {} expected {}",
             length,
             expected
@@ -309,9 +312,9 @@ mod test {
         let one = Vec3 { x, y, z };
         let two = Vec3 { x, y, z };
         let answer = dot(one, two);
-        let expected: f32 = (x * x) + (y * y) + (z * z);
+        let expected: f64 = (x * x) + (y * y) + (z * z);
         assert!(
-            (expected - answer).abs() < f32::EPSILON,
+            (expected - answer).abs() < f64::EPSILON,
             "got {} expected {}",
             answer,
             expected

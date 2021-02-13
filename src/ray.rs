@@ -1,4 +1,4 @@
-use rand::prelude::ThreadRng;
+use rand::{distributions::Uniform, prelude::ThreadRng};
 
 use crate::vec3::{unit_vector, Vec3};
 use crate::{
@@ -16,12 +16,18 @@ impl Ray {
         Self { origin, direction }
     }
 
-    pub fn at(&self, t: f32) -> Vec3 {
+    pub fn at(&self, t: f64) -> Vec3 {
         self.origin + self.direction * t
     }
 }
 
-pub fn ray_color<T>(ray: &Ray, world: &Hittables<T>, depth: u16, rng: &mut ThreadRng) -> Vec3
+pub fn ray_color<T>(
+    ray: &Ray,
+    world: &Hittables<T>,
+    depth: u16,
+    rng: &mut ThreadRng,
+    between: &Uniform<f64>,
+) -> Vec3
 where
     T: Hit,
 {
@@ -29,12 +35,12 @@ where
     if depth == 0 {
         return Vec3::new(0.0, 0.0, 0.0);
     }
-    if world.hit(ray, 0.0, f32::INFINITY, &mut record) {
-        let target = record.point + record.normal + random_in_unit_sphere(rng);
+    if world.hit(ray, 0.0, f64::INFINITY, &mut record) {
+        let target = record.point + record.normal + random_in_unit_sphere(rng, between);
         let ray = Ray::new(record.point, target - record.point);
-        return 0.5 * ray_color(&ray, world, depth - 1, rng);
+        return 0.5 * ray_color(&ray, world, depth - 1, rng, between);
     }
     let unit_direction = unit_vector(ray.direction);
     let t = 0.5 * (unit_direction.y + 1.0);
-    Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
