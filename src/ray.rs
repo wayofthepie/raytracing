@@ -28,13 +28,13 @@ pub fn ray_color(ray: &Ray) -> Vec3 {
 
 pub fn hit_sphere(center: Vec3, radius: f32, ray: &Ray) -> f32 {
     let oc = ray.origin - center;
-    let a = dot(ray.direction, ray.direction);
-    let b = 2.0 * dot(oc, ray.direction);
-    let c = dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = ray.direction.length_squared();
+    let half_b = dot(oc, ray.direction);
+    let c = oc.length_squared() - radius.powi(2);
+    let discriminant = half_b.powi(2) - a * c;
     if discriminant < 0.0 {
         -1.0
     } else {
-        (-b - discriminant.sqrt()) / (2.0 * a)
+        (-half_b - discriminant.sqrt()) / a
     }
 }
