@@ -25,22 +25,17 @@ const MAX_DEPTH: u16 = 50;
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
 
-    // TODO this is total madness :D refactor!
-    let mut l = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-    let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
-    let material_ground = Some(Rc::new(l));
+    let mut lamberian_one = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
+    let material_ground = package_material(&mut lamberian_one);
 
-    let mut l = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
-    let l: RefCell<&mut dyn Material> = RefCell::new(&mut l);
-    let material_center = Some(Rc::new(l));
+    let mut lamberian_two = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
+    let material_center = package_material(&mut lamberian_two);
 
-    let mut metal = Metal::new(Vec3::new(0.8, 0.8, 0.8));
-    let metal: RefCell<&mut dyn Material> = RefCell::new(&mut metal);
-    let material_left = Some(Rc::new(metal));
+    let mut metal_one = Metal::new(Vec3::new(0.8, 0.8, 0.8));
+    let material_left = package_material(&mut metal_one);
 
-    let mut metal = Metal::new(Vec3::new(0.8, 0.6, 0.3));
-    let metal: RefCell<&mut dyn Material> = RefCell::new(&mut metal);
-    let material_right = Some(Rc::new(metal));
+    let mut metal_two = Metal::new(Vec3::new(0.8, 0.6, 0.3));
+    let material_right = package_material(&mut metal_two);
 
     let mut rng = rand::thread_rng();
     let between = Uniform::new(0.0, 1.0);
@@ -50,11 +45,23 @@ fn main() -> Result<(), Box<dyn Error>> {
     world.add(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
         100.0,
-        material_ground,
+        Some(material_ground),
     ));
-    world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
-    world.add(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
+    world.add(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        Some(material_center),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        0.5,
+        Some(material_left),
+    ));
+    world.add(Sphere::new(
+        Vec3::new(1.0, 0.0, -1.0),
+        0.5,
+        Some(material_right),
+    ));
 
     let camera = Camera::new();
 
@@ -100,4 +107,9 @@ fn write_color(
         .as_bytes(),
     )?;
     Ok(())
+}
+
+fn package_material(material: &mut dyn Material) -> Rc<RefCell<&mut dyn Material>> {
+    let metal: RefCell<&mut dyn Material> = RefCell::new(material);
+    Rc::new(metal)
 }
