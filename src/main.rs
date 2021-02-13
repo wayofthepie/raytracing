@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate impl_ops;
+
 mod camera;
 mod ray;
 mod sphere;
