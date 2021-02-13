@@ -1,6 +1,6 @@
 use std::ops;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -21,11 +21,11 @@ impl Vec3 {
     }
 }
 
-pub fn dot(u: &Vec3, v: &Vec3) -> f32 {
+pub fn dot(u: Vec3, v: Vec3) -> f32 {
     u.x * v.x + u.y * v.y + u.z * v.z
 }
 
-pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
+pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
     Vec3 {
         x: (u.y * v.z) - (v.z * u.y),
         y: (u.z * v.x) - (u.x * v.z),
@@ -33,7 +33,7 @@ pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
     }
 }
 
-pub fn unit_vector(v: &Vec3) -> Vec3 {
+pub fn unit_vector(v: Vec3) -> Vec3 {
     v / v.length()
 }
 
@@ -42,11 +42,7 @@ impl ops::Neg for Vec3 {
 
     fn neg(self) -> Self::Output {
         let Self { x, y, z } = self;
-        Self {
-            x: -x,
-            y: -y,
-            z: -z,
-        }
+        Self::new(-x, -y, -z)
     }
 }
 
@@ -54,11 +50,7 @@ impl ops::Add for Vec3 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Self {
-            x: (self.x + rhs.x),
-            y: (self.y + rhs.y),
-            z: (self.z + rhs.z),
-        }
+        Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
@@ -66,43 +58,31 @@ impl ops::Sub for Vec3 {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Self {
-            x: (self.x - rhs.x),
-            y: (self.y - rhs.y),
-            z: (self.z - rhs.z),
-        }
+        Self::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
 impl ops::Mul for Vec3 {
-    type Output = Self;
+    type Output = Vec3;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Self {
-            x: (self.x * rhs.x),
-            y: (self.y * rhs.y),
-            z: (self.z * rhs.z),
-        }
+        Self::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 
-impl<'a> ops::Div<f32> for &'a Vec3 {
-    type Output = Vec3;
+impl ops::Div<f32> for Vec3 {
+    type Output = Self;
 
     fn div(self, rhs: f32) -> Self::Output {
         self * (1.0 / rhs)
     }
 }
 
-impl<'a> ops::Mul<f32> for &'a Vec3 {
-    type Output = Vec3;
+impl ops::Mul<f32> for Vec3 {
+    type Output = Self;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        Vec3 {
-            x: (self.x * rhs),
-            y: (self.y * rhs),
-            z: (self.z * rhs),
-        }
+        Self::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
@@ -252,7 +232,7 @@ mod test {
         let y = 2.0;
         let z = 3.0;
         let vec = Vec3 { x, y, z };
-        let answer = &vec * 2.0;
+        let answer = vec * 2.0;
         assert_eq!(
             answer,
             Vec3 {
@@ -269,7 +249,7 @@ mod test {
         let y = 3.0;
         let z = 5.0;
         let vec = Vec3 { x, y, z };
-        let answer = &vec / 2.0;
+        let answer = vec / 2.0;
         assert_eq!(
             answer,
             Vec3 {
@@ -336,7 +316,7 @@ mod test {
         let z = 5.0;
         let one = Vec3 { x, y, z };
         let two = Vec3 { x, y, z };
-        let answer = dot(&one, &two);
+        let answer = dot(one, two);
         let expected: f32 = (x * x) + (y * y) + (z * z);
         assert!(
             (expected - answer).abs() < f32::EPSILON,
@@ -353,7 +333,7 @@ mod test {
         let z = 5.0;
         let one = Vec3 { x, y, z };
         let two = Vec3 { x, y, z };
-        let answer = cross(&one, &two);
+        let answer = cross(one, two);
         let expected = Vec3 {
             x: (y * z) - (z * y),
             y: (z * x) - (x * z),
@@ -368,8 +348,8 @@ mod test {
         let y = 3.0;
         let z = 5.0;
         let one = Vec3 { x, y, z };
-        let answer = unit_vector(&one);
-        let expected = &one * (1.0 / one.length());
+        let answer = unit_vector(one);
+        let expected = one * (1.0 / one.length());
         assert_eq!(answer, expected);
     }
 }
