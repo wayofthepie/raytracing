@@ -1,10 +1,6 @@
+use crate::sphere::{Hit, HitRecord, Hittables};
+use crate::vec3::{random_in_hemisphere, unit_vector, Vec3};
 use rand::{distributions::Uniform, prelude::ThreadRng};
-
-use crate::vec3::{unit_vector, Vec3};
-use crate::{
-    sphere::{Hit, HitRecord, Hittables},
-    vec3::random_in_unit_sphere,
-};
 
 pub struct Ray {
     pub origin: Vec3,
@@ -35,8 +31,9 @@ where
     if depth == 0 {
         return Vec3::new(0.0, 0.0, 0.0);
     }
-    if world.hit(ray, 0.0, f64::INFINITY, &mut record) {
-        let target = record.point + record.normal + random_in_unit_sphere(rng, between);
+    if world.hit(ray, 0.001, f64::INFINITY, &mut record) {
+        let target =
+            record.point + record.normal + random_in_hemisphere(record.normal, rng, between);
         let ray = Ray::new(record.point, target - record.point);
         return 0.5 * ray_color(&ray, world, depth - 1, rng, between);
     }

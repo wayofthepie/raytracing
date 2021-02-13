@@ -48,6 +48,19 @@ pub fn random_in_unit_sphere(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec
     }
 }
 
+pub fn random_in_hemisphere(normal: Vec3, rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
+    let in_unit_sphere = random_in_unit_sphere(rng, between);
+    if dot(in_unit_sphere, normal) > 0.0 {
+        in_unit_sphere
+    } else {
+        -in_unit_sphere
+    }
+}
+
+pub fn random_unit_vector(rng: &mut ThreadRng, between: &Uniform<f64>) -> Vec3 {
+    unit_vector(random_in_unit_sphere(rng, between))
+}
+
 pub fn dot(u: Vec3, v: Vec3) -> f64 {
     u.x * v.x + u.y * v.y + u.z * v.z
 }
