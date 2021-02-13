@@ -14,7 +14,7 @@ pub struct HitRecord<'material> {
     pub normal: Vec3,
     pub t: f64,
     pub front_face: bool,
-    pub material: Option<Rc<RefCell<&'material mut (dyn Material + 'material)>>>,
+    pub material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
 }
 
 pub fn face_normal(ray: &Ray, outward_normal: Vec3) -> (bool, Vec3) {

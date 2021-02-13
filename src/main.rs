@@ -45,23 +45,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     world.add(Sphere::new(
         Vec3::new(0.0, -100.5, -1.0),
         100.0,
-        Some(material_ground),
+        material_ground,
     ));
-    world.add(Sphere::new(
-        Vec3::new(0.0, 0.0, -1.0),
-        0.5,
-        Some(material_center),
-    ));
-    world.add(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        0.5,
-        Some(material_left),
-    ));
-    world.add(Sphere::new(
-        Vec3::new(1.0, 0.0, -1.0),
-        0.5,
-        Some(material_right),
-    ));
+    world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
+    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
     let camera = Camera::new();
 

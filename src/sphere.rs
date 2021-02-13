@@ -10,14 +10,14 @@ use crate::{
 pub struct Sphere<'material> {
     center: Vec3,
     radius: f64,
-    material: Option<Rc<RefCell<&'material mut (dyn Material + 'material)>>>,
+    material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
 }
 
 impl<'material> Sphere<'material> {
     pub fn new(
         center: Vec3,
         radius: f64,
-        material: Option<Rc<RefCell<&'material mut (dyn Material + 'material)>>>,
+        material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
     ) -> Self {
         Self {
             center,
