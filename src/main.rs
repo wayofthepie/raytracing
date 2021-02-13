@@ -13,9 +13,10 @@ use std::{error::Error, io::Write};
 use vec3::Vec3;
 
 const ASPECT_RATIO: f32 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 1200;
+const IMAGE_WIDTH: usize = 400;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f32 / ASPECT_RATIO) as usize;
 const SAMPLES_PER_PIXEL: usize = 100;
+const MAX_DEPTH: u16 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
@@ -36,7 +37,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let u = (i as f32 + rng.gen_range(0.0..1.0)) / (IMAGE_WIDTH - 1) as f32;
                 let v = (j as f32 + rng.gen_range(0.0..1.0)) / (IMAGE_HEIGHT - 1) as f32;
                 let ray = camera.get_ray(u, v);
-                color += ray_color(&ray, &world);
+                color += ray_color(&ray, &world, MAX_DEPTH, &mut rng);
             }
             write_color(&stdout, color, SAMPLES_PER_PIXEL)?;
         }
@@ -54,9 +55,9 @@ fn write_color(
     let mut g = color.y;
     let mut b = color.z;
     let scale = 1.0 / samples_per_pixel as f32;
-    r *= scale;
-    g *= scale;
-    b *= scale;
+    r = (scale * r).sqrt();
+    g = (scale * g).sqrt();
+    b = (scale * b).sqrt();
 
     let c = 256.0;
     stdout.write_all(

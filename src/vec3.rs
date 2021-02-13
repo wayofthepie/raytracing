@@ -1,5 +1,7 @@
 use std::ops;
 
+use rand::{prelude::ThreadRng, Rng};
+
 #[derive(Default, Debug, PartialEq, Clone, Copy)]
 pub struct Vec3 {
     pub x: f32,
@@ -18,6 +20,28 @@ impl Vec3 {
 
     pub fn length_squared(&self) -> f32 {
         (self.x * self.x) + (self.y * self.y) + (self.z * self.z)
+    }
+}
+
+pub fn random(rng: &mut ThreadRng) -> Vec3 {
+    random_bounded(rng, 0.0, 1.0)
+}
+
+pub fn random_bounded(rng: &mut ThreadRng, min: f32, max: f32) -> Vec3 {
+    Vec3::new(
+        rng.gen_range(min..max),
+        rng.gen_range(min..max),
+        rng.gen_range(min..max),
+    )
+}
+
+pub fn random_in_unit_sphere(rng: &mut ThreadRng) -> Vec3 {
+    loop {
+        let p = random_bounded(rng, -1.0, 1.0);
+        if p.length_squared() >= 1.0 {
+            continue;
+        }
+        return p;
     }
 }
 
