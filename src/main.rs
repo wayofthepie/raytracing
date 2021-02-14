@@ -17,7 +17,7 @@ use std::{cell::RefCell, error::Error, io::Write, rc::Rc};
 use vec3::Vec3;
 
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 1440;
+const IMAGE_WIDTH: usize = 400;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 const SAMPLES_PER_PIXEL: usize = 100;
 const MAX_DEPTH: u16 = 50;
@@ -62,7 +62,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 let u = (i as f64 + between.sample(&mut rng)) / (IMAGE_WIDTH - 1) as f64;
                 let v = (j as f64 + between.sample(&mut rng)) / (IMAGE_HEIGHT - 1) as f64;
                 let ray = camera.get_ray(u, v);
-                color += ray_color(&ray, &world, MAX_DEPTH, &mut rng, &between);
+                color += ray_color(&ray, &world, MAX_DEPTH);
             }
             write_color(&stdout, color, SAMPLES_PER_PIXEL)?;
         }

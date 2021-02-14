@@ -20,13 +20,7 @@ impl Ray {
     }
 }
 
-pub fn ray_color<'material, T>(
-    ray: &Ray,
-    world: &Hittables<T>,
-    depth: u16,
-    rng: &mut ThreadRng,
-    between: &Uniform<f64>,
-) -> Vec3
+pub fn ray_color<'material, T>(ray: &Ray, world: &Hittables<T>, depth: u16) -> Vec3
 where
     T: Hit<'material>,
 {
@@ -45,11 +39,13 @@ where
                 .then(|| attenuation)
         };
         if let Some(attenuation) = maybe_attenuation {
-            return attenuation * ray_color(&scattered, world, depth - 1, rng, between);
+            attenuation * ray_color(&scattered, world, depth - 1)
+        } else {
+            Vec3::default()
         }
-        return Vec3::default();
+    } else {
+        let unit_direction = unit_vector(ray.direction);
+        let t = 0.5 * (unit_direction.y + 1.0);
+        (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
     }
-    let unit_direction = unit_vector(ray.direction);
-    let t = 0.5 * (unit_direction.y + 1.0);
-    (1.0 - t) * Vec3::new(1.0, 1.0, 1.0) + t * Vec3::new(0.5, 0.7, 1.0)
 }
