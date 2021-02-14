@@ -3,7 +3,6 @@ use crate::{
     vec3::{unit_vector, Vec3},
 };
 
-
 #[derive(Default, Debug)]
 pub struct Ray {
     pub origin: Vec3,

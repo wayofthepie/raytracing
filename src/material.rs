@@ -1,10 +1,9 @@
-use rand::Rng;
-
 use crate::{
     hit::HitRecord,
     ray::Ray,
     vec3::{dot, random_in_unit_sphere, random_unit_vector, reflect, unit_vector, Vec3},
 };
+use rand::Rng;
 
 pub trait Material {
     fn scatter(

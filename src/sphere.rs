@@ -1,23 +1,22 @@
-use std::{cell::RefCell, rc::Rc};
-
 use crate::{
     hit::{face_normal, Hit, HitRecord},
     material::Material,
     ray::Ray,
     vec3::{dot, Vec3},
 };
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Sphere<'material> {
     center: Vec3,
     radius: f64,
-    material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
+    material: Rc<RefCell<Box<dyn Material + 'material>>>,
 }
 
 impl<'material> Sphere<'material> {
     pub fn new(
         center: Vec3,
         radius: f64,
-        material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
+        material: Rc<RefCell<Box<dyn Material + 'material>>>,
     ) -> Self {
         Self {
             center,
@@ -51,7 +50,7 @@ impl<'material> Hit<'material> for Sphere<'material> {
         let outward_normal = (point - self.center) / self.radius;
         let (front_face, normal) = face_normal(ray, outward_normal);
         Some(HitRecord {
-            point: ray.at(root),
+            point,
             normal,
             front_face,
             t: root,

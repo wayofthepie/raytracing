@@ -10,58 +10,41 @@ mod vec3;
 use camera::Camera;
 use hit::Hittables;
 use material::{Dialectric, Lambertian, Material, Metal};
-use rand::{distributions::Uniform, prelude::Distribution};
+use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use ray::ray_color;
 use sphere::Sphere;
 use std::{cell::RefCell, error::Error, io::Write, rc::Rc};
 use vec3::Vec3;
 
-const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 400;
+const ASPECT_RATIO: f64 = 3.0 / 2.0;
+const IMAGE_WIDTH: usize = 1200;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
-const SAMPLES_PER_PIXEL: usize = 100;
+const SAMPLES_PER_PIXEL: usize = 500;
 const MAX_DEPTH: u16 = 50;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
-
-    let mut material_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-    let material_ground = package_material(&mut material_ground);
-
-    let mut material_center = Lambertian::new(Vec3::new(0.1, 0.2, 0.5));
-    let material_center = package_material(&mut material_center);
-
-    let mut material_left = Dialectric::new(1.5);
-    let material_left = package_material(&mut material_left);
-
-    let mut material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
-    let material_right = package_material(&mut material_right);
-
     let mut rng = rand::thread_rng();
     let between = Uniform::new(0.0, 1.0);
 
     // World
-    let mut world = Hittables::new();
-    world.add(Sphere::new(
-        Vec3::new(0.0, -100.5, -1.0),
-        100.0,
-        material_ground,
-    ));
-    world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(Sphere::new(
-        Vec3::new(-1.0, 0.0, -1.0),
-        0.5,
-        material_left.clone(),
-    ));
-    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.4, material_left));
-    world.add(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
+    let world = random_scene();
+
+    // Camera
+    let look_from = Vec3::new(13.0, 2.0, 3.0);
+    let look_at = Vec3::new(0.0, 0.0, 0.0);
+    let vertical_up = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
+    let aperture = 0.1;
 
     let camera = Camera::new(
-        Vec3::new(-2.0, 2.0, 1.0),
-        Vec3::new(0.0, 0.0, -1.0),
-        Vec3::new(0.0, 1.0, 0.0),
+        look_from,
+        look_at,
+        vertical_up,
         20.0,
         ASPECT_RATIO,
+        aperture,
+        dist_to_focus,
     );
 
     stdout.write_all(format!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT).as_bytes())?;
@@ -108,7 +91,55 @@ fn write_color(
     Ok(())
 }
 
-fn package_material(material: &mut dyn Material) -> Rc<RefCell<&mut dyn Material>> {
-    let metal: RefCell<&mut dyn Material> = RefCell::new(material);
+fn random_scene() -> Hittables<Sphere<'static>> {
+    let mut rng = rand::thread_rng();
+    let mut world = Hittables::new();
+    let material_ground = Box::new(Lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    let material_ground = package_material(material_ground);
+    world.add(Sphere::new(
+        Vec3::new(0.0, -1000.0, 0.0),
+        1000.0,
+        material_ground,
+    ));
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = rng.gen_range(0.0..1.0);
+            let center = Vec3::new(
+                a as f64 + 0.9 * rng.gen_range(0.0..1.0),
+                0.2,
+                b as f64 + 0.9 * rng.gen_range(0.0..1.0),
+            );
+            if (center - Vec3::new(4.0, 0.2, 0.0)).length() > 0.9 {
+                let material = if choose_mat < 0.8 {
+                    let albedo = Vec3::random(0.0, 1.0) * Vec3::random(0.0, 1.0);
+                    let material = Lambertian::new(albedo);
+                    package_material(Box::new(material))
+                } else if choose_mat < 0.95 {
+                    let albedo = Vec3::random(0.5, 1.0);
+                    let fuzz = rng.gen_range(0.0..0.5);
+                    let material = Metal::new(albedo, fuzz);
+                    package_material(Box::new(material))
+                } else {
+                    package_material(Box::new(Dialectric::new(1.5)))
+                };
+                let sphere = Sphere::new(center, 0.2, material);
+                world.add(sphere);
+            }
+        }
+    }
+    let material = package_material(Box::new(Dialectric::new(1.5)));
+    let sphere = Sphere::new(Vec3::new(0.0, 1.0, 0.0), 1.0, material);
+    world.add(sphere);
+    let material = package_material(Box::new(Lambertian::new(Vec3::new(0.4, 0.2, 0.1))));
+    let sphere = Sphere::new(Vec3::new(-4.0, 1.0, 0.0), 1.0, material);
+    world.add(sphere);
+    let material = package_material(Box::new(Metal::new(Vec3::new(0.7, 0.6, 0.5), 0.0)));
+    let sphere = Sphere::new(Vec3::new(4.0, 1.0, 0.0), 1.0, material);
+    world.add(sphere);
+    world
+}
+
+fn package_material(material: Box<dyn Material>) -> Rc<RefCell<Box<dyn Material>>> {
+    let metal: RefCell<Box<dyn Material>> = RefCell::new(material);
     Rc::new(metal)
 }
