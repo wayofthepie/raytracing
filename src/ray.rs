@@ -40,11 +40,9 @@ where
         let normal = record.normal;
         let maybe_attenuation = {
             let material_ref = &mut *record.material.borrow_mut();
-            if material_ref.scatter(ray, normal, point, &mut attenuation, &mut scattered) {
-                Some(attenuation)
-            } else {
-                None
-            }
+            material_ref
+                .scatter(ray, normal, point, &mut attenuation, &mut scattered)
+                .then(|| attenuation)
         };
         if let Some(attenuation) = maybe_attenuation {
             return attenuation * ray_color(&scattered, world, depth - 1, rng, between);

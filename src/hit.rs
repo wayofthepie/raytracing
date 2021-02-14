@@ -13,16 +13,15 @@ pub struct HitRecord<'material> {
     pub point: Vec3,
     pub normal: Vec3,
     pub t: f64,
-    pub front_face: bool,
     pub material: Rc<RefCell<&'material mut (dyn Material + 'material)>>,
 }
 
-pub fn face_normal(ray: &Ray, outward_normal: Vec3) -> (bool, Vec3) {
+pub fn face_normal(ray: &Ray, outward_normal: Vec3) -> Vec3 {
     let front_face = dot(ray.direction, outward_normal) < 0.0;
     if front_face {
-        (front_face, outward_normal)
+        outward_normal
     } else {
-        (front_face, -outward_normal)
+        -outward_normal
     }
 }
 
