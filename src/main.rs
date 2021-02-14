@@ -9,7 +9,7 @@ mod sphere;
 mod vec3;
 use camera::Camera;
 use hit::Hittables;
-use material::{Lambertian, Material, Metal};
+use material::{Dialectric, Lambertian, Material, Metal};
 use rand::{distributions::Uniform, prelude::Distribution};
 use ray::ray_color;
 use sphere::Sphere;
@@ -28,11 +28,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut lamberian_one = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
     let material_ground = package_material(&mut lamberian_one);
 
-    let mut lamberian_two = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
-    let material_center = package_material(&mut lamberian_two);
+    let mut dialectric_center = Dialectric::new(1.5);
+    let material_center = package_material(&mut dialectric_center);
 
-    let mut metal_one = Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3);
-    let material_left = package_material(&mut metal_one);
+    let mut dialectric_left = Dialectric::new(1.5);
+    let material_left = package_material(&mut dialectric_left);
 
     let mut metal_two = Metal::new(Vec3::new(0.8, 0.6, 0.3), 1.0);
     let material_right = package_material(&mut metal_two);

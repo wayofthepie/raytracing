@@ -2,7 +2,7 @@ use crate::{
     hit::{Hit, Hittables},
     vec3::{unit_vector, Vec3},
 };
-use rand::{distributions::Uniform, prelude::ThreadRng};
+
 
 #[derive(Default, Debug)]
 pub struct Ray {
@@ -30,12 +30,10 @@ where
     if let Some(record) = world.hit(ray, 0.001, f64::INFINITY) {
         let mut scattered = Ray::default();
         let mut attenuation = Vec3::default();
-        let point = record.point;
-        let normal = record.normal;
         let maybe_attenuation = {
             let material_ref = &mut *record.material.borrow_mut();
             material_ref
-                .scatter(ray, normal, point, &mut attenuation, &mut scattered)
+                .scatter(ray, &record, &mut attenuation, &mut scattered)
                 .then(|| attenuation)
         };
         if let Some(attenuation) = maybe_attenuation {

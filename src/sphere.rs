@@ -49,10 +49,11 @@ impl<'material> Hit<'material> for Sphere<'material> {
         let t = root;
         let point = ray.at(t);
         let outward_normal = (point - self.center) / self.radius;
-        let normal = face_normal(ray, outward_normal);
+        let (front_face, normal) = face_normal(ray, outward_normal);
         Some(HitRecord {
             point: ray.at(root),
             normal,
+            front_face,
             t: root,
             material: self.material.clone(),
         })
