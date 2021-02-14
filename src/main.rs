@@ -31,10 +31,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut lamberian_two = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
     let material_center = package_material(&mut lamberian_two);
 
-    let mut metal_one = Metal::new(Vec3::new(0.8, 0.8, 0.8));
+    let mut metal_one = Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3);
     let material_left = package_material(&mut metal_one);
 
-    let mut metal_two = Metal::new(Vec3::new(0.8, 0.6, 0.3));
+    let mut metal_two = Metal::new(Vec3::new(0.8, 0.6, 0.3), 1.0);
     let material_right = package_material(&mut metal_two);
 
     let mut rng = rand::thread_rng();
