@@ -25,17 +25,17 @@ const MAX_DEPTH: u16 = 50;
 fn main() -> Result<(), Box<dyn Error>> {
     let mut stdout = std::io::stdout();
 
-    let mut lamberian_one = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-    let material_ground = package_material(&mut lamberian_one);
+    let mut material_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
+    let material_ground = package_material(&mut material_ground);
 
-    let mut dialectric_center = Dialectric::new(1.5);
-    let material_center = package_material(&mut dialectric_center);
+    let mut material_center = Lambertian::new(Vec3::new(0.1, 0.2, 0.5));
+    let material_center = package_material(&mut material_center);
 
-    let mut dialectric_left = Dialectric::new(1.5);
-    let material_left = package_material(&mut dialectric_left);
+    let mut material_left = Dialectric::new(1.5);
+    let material_left = package_material(&mut material_left);
 
-    let mut metal_two = Metal::new(Vec3::new(0.8, 0.6, 0.3), 1.0);
-    let material_right = package_material(&mut metal_two);
+    let mut material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
+    let material_right = package_material(&mut material_right);
 
     let mut rng = rand::thread_rng();
     let between = Uniform::new(0.0, 1.0);
@@ -48,10 +48,21 @@ fn main() -> Result<(), Box<dyn Error>> {
         material_ground,
     ));
     world.add(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, material_center));
-    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(Sphere::new(
+        Vec3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left.clone(),
+    ));
+    world.add(Sphere::new(Vec3::new(-1.0, 0.0, -1.0), -0.4, material_left));
     world.add(Sphere::new(Vec3::new(1.0, 0.0, -1.0), 0.5, material_right));
 
-    let camera = Camera::new();
+    let camera = Camera::new(
+        Vec3::new(-2.0, 2.0, 1.0),
+        Vec3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+        20.0,
+        ASPECT_RATIO,
+    );
 
     stdout.write_all(format!("P3\n{} {}\n255\n", IMAGE_WIDTH, IMAGE_HEIGHT).as_bytes())?;
     for j in (0..IMAGE_HEIGHT).rev() {

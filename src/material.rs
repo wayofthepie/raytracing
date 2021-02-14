@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::{
     hit::HitRecord,
     ray::Ray,
@@ -80,6 +82,13 @@ impl Dialectric {
     pub fn new(refraction_index: f64) -> Self {
         Self { refraction_index }
     }
+
+    pub fn reflectance(cosine: f64, refraction_index: f64) -> f64 {
+        // Schlicks approximation
+        let mut r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+        r0 = r0.powi(2);
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
+    }
 }
 
 impl Material for Dialectric {
@@ -90,6 +99,8 @@ impl Material for Dialectric {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool {
+        // TODO prob not great to get this each call
+        let mut rng = rand::thread_rng();
         *attenuation = Vec3::new(1.0, 1.0, 1.0);
         let refraction_ratio = if record.front_face {
             1.0 / self.refraction_index
@@ -97,8 +108,17 @@ impl Material for Dialectric {
             self.refraction_index
         };
         let unit_direction = unit_vector(ray_in.direction);
-        let refracted = refract(unit_direction, record.normal, refraction_ratio);
-        *scattered = Ray::new(record.point, refracted);
+        let cos_theta = f64::min(dot(-unit_direction, record.normal), 1.0);
+        let sin_theta = (1.0 - cos_theta.powi(2)).sqrt();
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+        let direction = if cannot_refract
+            || Dialectric::reflectance(cos_theta, refraction_ratio) > rng.gen_range(0.0..1.0)
+        {
+            reflect(unit_direction, record.normal)
+        } else {
+            refract(unit_direction, record.normal, refraction_ratio)
+        };
+        *scattered = Ray::new(record.point, direction);
         true
     }
 }
