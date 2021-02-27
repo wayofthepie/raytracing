@@ -1,5 +1,5 @@
 [package]
-name = "riaw"
+name = "raytracing"
 version = "0.1.0"
 authors = ["Stephen OBrien <wayofthepie@gmail.com>"]
 edition = "2018"
